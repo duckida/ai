@@ -6,6 +6,7 @@ const envSchema = type({
   PORT: "string.numeric.parse",
   HACK_CLUB_CLIENT_ID: "string",
   HACK_CLUB_CLIENT_SECRET: "string",
+  SLACK_GEOBLOCK_WEBHOOK_URL: "string.url",
   OPENAI_API_URL: "string",
   OPENAI_API_KEY: "string",
   OPENAI_MODERATION_API_KEY: "string",

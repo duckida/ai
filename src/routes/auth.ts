@@ -19,7 +19,22 @@ interface HackClubIdentityResponse {
     last_name: string;
     verification_status: string;
     ysws_eligible: boolean;
+    addresses?: HackClubAddress[];
   };
+}
+
+interface HackClubAddress {
+  id: string;
+  first_name: string;
+  last_name: string;
+  line_1: string;
+  line_2?: string | null;
+  city: string;
+  state?: string | null;
+  postal_code: string;
+  country: string;
+  phone_number?: string | null;
+  primary: boolean;
 }
 
 interface HackClubTokenResponse {
@@ -30,6 +45,58 @@ interface HackClubTokenResponse {
 }
 
 const auth = new Hono<{ Variables: AppVariables }>();
+
+const blockedAddressCountries = new Set(["CN", "CHINA", "HK", "HONG KONG"]);
+
+function hasBlockedAddressCountry(
+  identity: HackClubIdentityResponse["identity"],
+) {
+  return identity.addresses?.some((address) =>
+    blockedAddressCountries.has(address.country.trim().toUpperCase()),
+  );
+}
+
+async function sendBlockedAddressSlackMessage(
+  identity: HackClubIdentityResponse["identity"],
+) {
+  const primaryAddress =
+    identity.addresses?.find((address) => address.primary) ??
+    identity.addresses?.[0];
+  const country = primaryAddress?.country ?? "unknown";
+  const name =
+    `${identity.first_name} ${identity.last_name}`.trim() || "Unknown";
+
+  const response = await fetch(env.SLACK_GEOBLOCK_WEBHOOK_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      blocks: [
+        {
+          type: "header",
+          text: {
+            type: "plain_text",
+            text: "Blocked address country detected",
+          },
+        },
+        {
+          type: "section",
+          fields: [
+            { type: "mrkdwn", text: `*Name:*\n${name}` },
+            { type: "mrkdwn", text: `*Email:*\n${identity.primary_email}` },
+            { type: "mrkdwn", text: `*Slack ID:*\n${identity.slack_id}` },
+            { type: "mrkdwn", text: `*Country:*\n${country}` },
+          ],
+        },
+      ],
+      text: `Blocked address country detected for ${identity.slack_id} (${country})`,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Slack webhook failed with status ${response.status}`);
+  }
+}
+
 auth.use(
   rateLimiter({
     limit: 30,
@@ -52,7 +119,7 @@ auth.get("/login", (c) => {
     path: "/auth",
   });
 
-  const authUrl = `https://auth.hackclub.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=email+name+slack_id+verification_status&state=${state}`;
+  const authUrl = `https://auth.hackclub.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=email+name+slack_id+verification_status+address&state=${state}`;
   return c.redirect(authUrl);
 });
 
@@ -118,6 +185,14 @@ auth.get("/callback", async (c) => {
 
     const userData = (await userResponse.json()) as HackClubIdentityResponse;
     const { identity } = userData;
+
+    if (hasBlockedAddressCountry(identity)) {
+      try {
+        await sendBlockedAddressSlackMessage(identity);
+      } catch (error) {
+        console.error("Failed to send blocked address Slack message:", error);
+      }
+    }
 
     if (!identity.slack_id) {
       throw new HTTPException(400, {
