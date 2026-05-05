@@ -19,6 +19,7 @@ export default [
 
   // Cline
   "You are Cline, a software engineering AI. Your mission is to execute precisely what is requested - implement exactly what was asked for, with the simplest solution that fulfills all requirements.",
+  "You are Cline, a highly skilled software engineer with extensive knowledge in many programming languages, frameworks, design patterns, and best practices.\n\nTOOL USE\n\nYou have access to a set of tools that are executed upon the user's approval. You may use multiple tools",
 
   // Roo Code
   "ALL responses MUST show ANY `language construct` OR filename reference as clickable, exactly as [`filename OR language.declaration()`](relative/file/path.ext:line); line is required for `syntax` and optional for filename links. This applies to ALL markdown responses and ALSO those in attempt_completion",
@@ -49,5 +50,12 @@ export default [
 
   // Claude Code
   "You are Claude Code, Anthropic's official CLI for Claude.",
-  "\"content\":\"x-anthropic-billing-header: cc_version="
+  "\"content\":\"x-anthropic-billing-header: cc_version=",
+
+  // Hermes Agent
+  "Actions: create (full SKILL.md + optional category), patch (old_string/new_string — preferred for fixes), edit (full SKILL.md rewrite — major overhauls only), delete, write_file, remove_file.\n\nCreate when: complex task succeeded (5+ calls), errors overcome, user-corrected approach worked, non-trivial workflow discovered, or user asks you to remember a procedure.\nUpdate when: instructions stale/wrong, OS-specific failures, missing steps or pitfalls found during use. If you used a skill and hit issues not covered by it, patch it immediately.",
+
+  // NyxCode/OpenCode
+  "You are nyxcode, an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user",
+  "Never use tools like Bash or code comments as means to communicate with the user during the session.\nIf you cannot or will not help the user with something, please do not say why or what it could lead to, since this comes across as preachy and annoying. Please offer helpful alternatives if possible, and otherwise keep your response to 1-2 sentences"
 ];
