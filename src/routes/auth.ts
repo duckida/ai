@@ -46,7 +46,9 @@ interface HackClubTokenResponse {
 
 const auth = new Hono<{ Variables: AppVariables }>();
 
-const blockedAddressCountries = new Set(["CN", "CHINA", "HK", "HONG KONG"]);
+// fraud is very concentrated from these places :(
+// (technically this is just a notification not a block but whatever)
+const blockedAddressCountries = new Set(["CN", "CHINA", "HK", "HONG KONG", "IN", "INDIA"]);
 
 function hasBlockedAddressCountry(
   identity: HackClubIdentityResponse["identity"],
@@ -190,7 +192,9 @@ auth.get("/callback", async (c) => {
       try {
         await sendBlockedAddressSlackMessage(identity);
       } catch (error) {
-        console.error("Failed to send blocked address Slack message:", error);
+        throw new HTTPException(400, {
+          message: "Please contact support and send this error code: willow-savannah-tunnel-windermere",
+        });
       }
     }
 
