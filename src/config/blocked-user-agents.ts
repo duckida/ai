@@ -1,1 +1,1 @@
-export default ["lobechat", "claude-proxy"];
+export default ["lobechat", "claude-proxy", "opencode"];
