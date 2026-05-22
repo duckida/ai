@@ -106,6 +106,13 @@
       "when": 1777623500982,
       "tag": "0014_jittery_master_chief",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1778009508013,
+      "tag": "0015_regular_winter_soldier",
+      "breakpoints": true
     }
   ]
 }

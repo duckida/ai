@@ -108,6 +108,27 @@ export const requestLogs = pgTable(
   ],
 );
 
+export const pendingCharges = pgTable(
+  "pending_charges",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    estimatedCost: numeric("estimated_cost", {
+      precision: 10,
+      scale: 8,
+    }).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("pending_charges_user_created_idx").on(
+      table.userId,
+      table.createdAt.desc(),
+    ),
+  ],
+);
+
 export const sessions = pgTable(
   "sessions",
   {
