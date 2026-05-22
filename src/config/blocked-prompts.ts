@@ -65,5 +65,8 @@ export default [
   "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.",
 
   // Codex CLI
-  "You are a coding agent running in the Codex CLI, a terminal-based coding assistant. Codex CLI is an open source project led by OpenAI. You are expected to be precise, safe, and helpful"
+  "You are a coding agent running in the Codex CLI, a terminal-based coding assistant. Codex CLI is an open source project led by OpenAI. You are expected to be precise, safe, and helpful",
+  "You are Codex, a coding agent based on GPT-5",
+  "You and the user share one workspace, and your job is to collaborate with them until their goal is genuinely handled.",
+  "Runs a command in a PTY, returning output or a session ID for ongoing interaction"
 ];
