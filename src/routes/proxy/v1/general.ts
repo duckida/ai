@@ -5,10 +5,12 @@ import type { ContentfulStatusCode } from "hono/utils/http-status";
 
 import { allowedImageModels, env } from "../../../env";
 import { requireApiKey } from "../../../middleware/auth";
+import { checkSpendingLimit, reserveCharge } from "../../../middleware/limits";
 import type { AppVariables } from "../../../types";
 import {
   apiHeaders,
   type Ctx,
+  estimateUpstreamCost,
   logRequest,
   MODEL_POOL,
   type ProxyReq,
@@ -17,6 +19,11 @@ import {
   SIZE_RATIOS,
   standardLimiter,
 } from "../shared";
+
+// Conservative fixed reservation for image generation. Real cost replaces
+// this on log; the point is just to make a single oversized burst impossible
+// when the user is already near their daily cap.
+const IMAGE_GENERATION_RESERVATION = 0.25;
 
 const general = new Hono<{ Variables: AppVariables }>();
 
@@ -29,6 +36,8 @@ async function handleProxy(c: Ctx, endpoint: string) {
     body.model = resolveModel(body.model, MODEL_POOL);
     body.user = `user_${c.get("user").id}`;
     body.usage = { include: true };
+
+    await reserveCharge(c, await estimateUpstreamCost(body));
 
     const res = await fetch(`${env.OPENAI_API_URL}/v1/${endpoint}`, {
       method: "POST",
@@ -128,14 +137,19 @@ async function handleProxy(c: Ctx, endpoint: string) {
 }
 
 for (const ep of ["chat/completions", "responses", "embeddings"])
-  general.post(`/${ep}`, requireApiKey, standardLimiter, (c) =>
-    handleProxy(c, ep),
+  general.post(
+    `/${ep}`,
+    requireApiKey,
+    standardLimiter,
+    checkSpendingLimit,
+    (c) => handleProxy(c, ep),
   );
 
 general.post(
   "/images/generations",
   requireApiKey,
   standardLimiter,
+  checkSpendingLimit,
   async (c) => {
     const start = Date.now();
     const body = (await c.req.json()) as {
@@ -148,6 +162,8 @@ general.post(
       body.model || allowedImageModels[0],
       allowedImageModels,
     );
+
+    await reserveCharge(c, IMAGE_GENERATION_RESERVATION);
 
     const res = await fetch(`${env.OPENAI_API_URL}/v1/chat/completions`, {
       method: "POST",
