@@ -140,6 +140,9 @@ const RecentRequestsTable = ({
                 Tokens
               </th>
               <th class="text-left py-4 px-4 font-bold text-sm text-brand-heading uppercase tracking-wider">
+                Cost
+              </th>
+              <th class="text-left py-4 px-4 font-bold text-sm text-brand-heading uppercase tracking-wider">
                 Result
               </th>
             </tr>
@@ -199,6 +202,13 @@ export const RecentRequestsRows = ({
                   {row.promptTokens.toLocaleString()} in /{" "}
                   {row.completionTokens.toLocaleString()} out
                 </span>
+              )}
+            </td>
+            <td class="py-2 px-4 text-sm text-brand-text font-medium whitespace-nowrap">
+              {errorMessage ? (
+                <span class="text-brand-text/60">-</span>
+              ) : (
+                <span>${parseFloat(row.cost).toFixed(6)}</span>
               )}
             </td>
             <td class="py-2 px-4 text-sm font-medium whitespace-nowrap">
