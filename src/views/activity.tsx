@@ -208,7 +208,7 @@ export const RecentRequestsRows = ({
               {errorMessage ? (
                 <span class="text-brand-text/60">-</span>
               ) : (
-                <span>${parseFloat(row.cost).toFixed(6)}</span>
+                <span>${parseFloat(row.cost).toFixed(3)}</span>
               )}
             </td>
             <td class="py-2 px-4 text-sm font-medium whitespace-nowrap">
