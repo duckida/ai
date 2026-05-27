@@ -1,3 +1,4 @@
+import { formatPrice } from "../lib/price";
 import type { DashboardRequestLog, Stats, User } from "../types";
 import { EmptyState } from "./components/EmptyState";
 import { Header } from "./components/Header";
@@ -208,7 +209,7 @@ export const RecentRequestsRows = ({
               {errorMessage ? (
                 <span class="text-brand-text/60">-</span>
               ) : (
-                <span>${parseFloat(row.cost).toFixed(3)}</span>
+                <span>{formatPrice(row.cost)}</span>
               )}
             </td>
             <td class="py-2 px-4 text-sm font-medium whitespace-nowrap">
